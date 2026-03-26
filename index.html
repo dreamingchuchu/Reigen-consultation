@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
     <style>
-        /* 1. 字体分工 */
+        /* 字体分工 */
         .manga-title { font-family: 'ZCOOL QingKe HuangYou', sans-serif !important; }
         .manga-content { font-family: "Microsoft YaHei", sans-serif !important; font-weight: 900 !important; }
 
@@ -23,417 +23,436 @@
         /* 顶部：10s流光 + 2s闪烁 */
         .header-rainbow {
             border-bottom: 6px solid #000;
-            animation: rainbow-master 12s infinite;
-            background: linear-gradient(90deg, #f00, #f80, #ff0, #0f0, #0ff, #00f, #80f, #f00);
-            background-size: 400% 400%;
+            background: linear-gradient(90deg, #ff0000, #ff8000, #ffff00, #00ff00, #00ffff, #0000ff, #8000ff, #ff0000);
+            background-size: 400% auto;
+            animation: flow 10s linear infinite, flash-cycle 12s step-end infinite;
         }
-        @keyframes rainbow-master {
-            0%, 83.3% { background-position: 0% 50%; filter: brightness(1); }
-            84%, 86%, 88%, 90%, 92%, 94%, 96%, 98%, 100% { filter: brightness(2) invert(0.2); }
-            85%, 87%, 89%, 91%, 93%, 95%, 97%, 99% { filter: brightness(1) invert(0); }
+        @keyframes flow { to { background-position: 400% center; } }
+        @keyframes flash-cycle {
+            0%, 83.3% { filter: brightness(1) invert(0); }
+            84%, 86%, 88%, 90%, 92%, 94%, 96%, 98% { filter: brightness(2) invert(0.2); }
+            85%, 87%, 89%, 91%, 93%, 95%, 97%, 100% { filter: brightness(1) invert(0); }
         }
-        .header-rainbow marquee { color: #fff; font-size: 2.2rem; font-weight: 900; text-shadow: 2px 2px 0 #000; }
+        .header-rainbow marquee {
+            color: #fff; font-size: 2.2rem; font-weight: 900;
+            text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+        }
 
         /* 导航栏 */
-        .nav-bar { background: #D4D0C8; border-bottom: 4px solid #000; display: flex; justify-content: center; gap: 2px; }
-        .nav-btn { padding: 12px 25px; border: 2px outset #fff; background: #C0C0C0; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+        .nav-bar { background: #D4D0C8; border-bottom: 4px solid #000; display: flex; justify-content: center; overflow-x: auto; }
+        .nav-btn { padding: 12px 20px; border: 2px outset #fff; background: #C0C0C0; font-weight: bold; cursor: pointer; white-space: nowrap; }
         .nav-btn.active { background: #000080; color: #fff; border-style: inset; }
 
-        /* 侧边栏吸附核心 */
-        .layout-container { display: flex; justify-content: center; max-width: 1450px; margin: 20px auto; padding: 0 10px; gap: 20px; align-items: flex-start; }
-        .sidebar { width: 280px; flex-shrink: 0; position: sticky; top: 15px; display: flex; flex-direction: column; gap: 15px; }
+        /* 登录状态红点 */
+        .online-dot { width: 8px; height: 8px; background: #f00; border-radius: 50%; display: inline-block; margin-right: 5px; box-shadow: 0 0 5px #f00; }
 
-        /* Win95 风格组件 */
-        .win-box {
+        /* 布局容器 */
+        .layout-container { display: flex; justify-content: center; max-width: 1450px; margin: 20px auto; padding: 0 10px; gap: 20px; align-items: flex-start; }
+        .side-column { width: 260px; flex-shrink: 0; position: sticky; top: 15px; display: flex; flex-direction: column; gap: 15px; }
+
+        /* Win95 & 漫画盒 */
+        .win-panel {
             background: #D4D0C8; border-top: 2px solid #FFF; border-left: 2px solid #FFF;
             border-right: 3px solid #808080; border-bottom: 3px solid #808080;
             box-shadow: 5px 5px 0px #000; padding: 10px;
         }
         .win-cap { background: #000080; color: white; padding: 2px 8px; font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; }
 
-        /* 文游风对话框 (VN Modal) */
-        .vn-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; flex-direction: column; justify-content: flex-end; padding: 50px; display: none; }
-        .vn-box { background: rgba(0,0,0,0.9); border: 4px solid #fff; color: #fff; padding: 30px; position: relative; max-width: 900px; margin: 0 auto; width: 100%; }
-        .vn-name { position: absolute; top: -35px; left: 20px; background: #000; border: 3px solid #fff; padding: 5px 25px; font-size: 1.5rem; font-weight: bold; }
-        .vn-text { font-size: 1.6rem; line-height: 1.6; min-height: 80px; }
+        /* 文游风弹窗 */
+        .vn-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; flex-direction: column; justify-content: flex-end; padding: 40px; display: none; }
+        .vn-box { background: #000; border: 4px solid #fff; color: #fff; padding: 30px; position: relative; max-width: 800px; margin: 0 auto; width: 100%; box-shadow: 0 0 30px rgba(255,255,255,0.2); }
+        .vn-name { position: absolute; top: -30px; left: 20px; background: #000; border: 2px solid #fff; padding: 2px 20px; font-size: 1.4rem; }
+        .vn-text { font-size: 1.5rem; line-height: 1.5; min-height: 80px; font-family: serif; }
 
-        /* ASCII 艺术框 */
-        .ascii-box { border: 2px dashed #0F0; color: #0F0; padding: 10px; font-family: monospace; font-size: 0.7rem; text-align: center; margin-top: 20px; }
+        /* 动画：飞向右下角文件夹 */
+        @keyframes fly { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(50vw, 80vh) scale(0.1); opacity:0; } }
+        .flying-doc { animation: fly 0.8s forwards ease-in; position: fixed; z-index: 999; }
 
-        /* 动画：飞向文件夹 */
-        @keyframes fly-to-folder {
-            0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
-            100% { transform: translate(400px, 600px) scale(0.1) rotate(720deg); opacity: 0; }
-        }
-        .paper-fly { animation: fly-to-folder 0.8s forwards ease-in; position: fixed; z-index: 999; }
+        /* 右下角文件夹 */
+        #folder-bin { position: fixed; bottom: 25px; right: 25px; width: 100px; height: 100px; background: #DAA520; border: 4px solid #000; box-shadow: 5px 5px 0 #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 900; }
 
-        /* 固定资产文件夹 */
-        #folder-asset { position: fixed; bottom: 30px; right: 30px; width: 90px; height: 90px; background: #DAA520; border: 4px solid #000; border-radius: 4px; box-shadow: 6px 6px 0 #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 900; }
-        #folder-count { font-size: 2rem; font-weight: 900; color: #000; }
+        /* 师匠点评 */
+        .master-reply { border-left: 8px solid #f00; padding: 12px; margin-top: 10px; background: #fff; color: #b00; font-weight: bold; box-shadow: 3px 3px 0 #eee; }
 
-        /* UI 小组件 */
-        .reigen-advice { border-left: 8px solid #f00; padding: 12px; margin-top: 15px; background: #fff; color: #900; box-shadow: 4px 4px 0 rgba(0,0,0,0.05); }
-        .blink { animation: blinker 0.6s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0; } }
         .hidden { display: none !important; }
+        .blink { animation: blinker 0.6s step-end infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
     </style>
 </head>
 <body class="manga-content">
 
-    <!-- 1. 顶部流光横幅 -->
+    <!-- 1. 顶部 -->
     <div class="header-rainbow">
-        <marquee scrollamount="12">★★★ 霊とか相談所 ★★★ 世纪新星灵幻大师 ★★★ 24h竭诚为您服务 ★★★ 现在咨询即送特惠安心套餐只需300円</marquee>
+        <marquee scrollamount="12">★★★ 霊とか相談所 ★★★ 世纪之新星灵幻大师 ★★★ 24小时除灵咨询中 ★★★现在咨询即送特惠安心套餐秩序999円★★★ </marquee>
     </div>
 
     <!-- 2. 导航栏 -->
     <div class="nav-bar manga-title">
-        <button onclick="switchTab('home')" id="nav-home" class="nav-btn active">主页看板</button>
-        <button onclick="switchTab('booking')" id="nav-booking" class="nav-btn">业务预订</button>
-        <button onclick="switchTab('forum')" id="nav-forum" class="nav-btn">相谈论坛</button>
-        <button onclick="switchTab('others')" id="nav-others" class="nav-btn">测试反馈</button>
-        <button onclick="toggleAuth()" id="auth-btn" class="nav-btn !bg-yellow-400">邮箱登录</button>
+        <button onclick="changeTab('home')" id="n-home" class="nav-btn active">相谈所主页</button>
+        <button onclick="changeTab('book')" id="n-book" class="nav-btn">业务预订</button>
+        <button onclick="changeTab('forum')" id="n-forum" class="nav-btn">相谈论坛</button>
+        <button onclick="changeTab('test')" id="n-test" class="nav-btn">灵感测试/反馈</button>
+        <button onclick="userAuth()" id="auth-btn" class="nav-btn !bg-yellow-400">邮箱登录</button>
     </div>
 
     <div class="layout-container">
         
-        <!-- 3. 左侧边栏 -->
-        <div class="sidebar">
-            <div class="win-box">
-                <div class="win-cap">官方认证职员</div>
+        <!-- 3. 左侧栏：常驻内容 -->
+        <div class="side-column">
+            <div class="win-panel">
+                <div class="win-cap">净化套餐</div>
                 <div class="text-[10px] space-y-1">
-                    <p><b>灵幻新隆</b>：世纪之新星，所长。</p>
-                    <p><b>影山茂夫</b>：首席弟子，清理工。</p>
-                    <p><b>暗田留</b>：名誉秘书，电波主管。</p>
-                    <p><b>芹泽克也</b>：社会经验修行员。</p>
+                    <div>● 灵气脉络体感重塑 <span class="float-right text-red-600">￥8k</span></div>
+                    <div>● 次元数字净化(PS) <span class="float-right text-red-600">￥3k</span></div>
+                    <div>● 社会性生灵祓除 <span class="float-right text-red-600">￥1.5w</span></div>
+                    <div class="text-blue-800 font-bold">● 人生重启包 <span class="float-right">免费</span></div>
                 </div>
             </div>
-            <div class="win-box">
-                <div class="win-cap">都市怪谈 A</div>
-                <div class="text-[10px] italic space-y-2">
-                    <p class="font-bold underline text-red-700">【高速婆婆】</p>
-                    <p>深夜在隧道里以百公里时速奔跑的老太，其实只是寂寞想找人赛跑。</p>
-                    <p class="font-bold underline text-red-700">【深夜人体模型】</p>
-                    <p>在学校实验室里四处走动，其实是在练习如何像人类一样走路。</p>
+
+            <div class="win-panel">
+                <div class="win-cap">职员档案库</div>
+                <div class="text-[9px] space-y-2">
+                    <p><b>灵幻新隆</b>：所长。拥有‘读懂人心’(高情商)的世纪天才。</p>
+                    <p><b>影山茂夫</b>：弟子。除灵与打扫卫生的主力军。</p>
+                    <p><b>芹泽克也</b>：社员。正处于职场常识补习阶段。</p>
+                    <p><b>暗田留</b>：秘书。电波部部长，宇宙联络员。</p>
                 </div>
             </div>
-            <div class="win-box bg-white">
-                <div class="win-cap !bg-green-800">师匠今日行程</div>
-                <div class="text-[9px] text-gray-700 italic">
-                    09:00 - 食盐品质鉴定<br>
-                    11:00 - 客户灵魂按摩(摸鱼)<br>
-                    14:00 - 异次元信号拦截(回复咨询)<br>
-                    18:00 - 弟子拉面聚餐指导
+
+            <div class="win-panel">
+                <div class="win-cap">都市怪谈合集 A</div>
+                <div class="text-[10px] space-y-2 italic">
+                    <p class="font-bold underline">【高速婆婆】</p>
+                    <p>深夜在隧道里赛跑的老太。劝告：不要试图超车。</p>
+                    <p class="font-bold underline text-blue-800">【深夜人体模型】</p>
+                    <p>理科室的常客。其实只是想找人切磋肌肉线条。</p>
                 </div>
             </div>
         </div>
 
-        <!-- 4. 中间主区域 -->
-        <div class="main-content w-full max-w-[650px]">
+        <!-- 4. 中间主显示区 -->
+        <div class="main-col w-full max-w-[620px]">
             
-            <!-- Tab: 主页 -->
-            <div id="tab-home" class="page-tab">
-                <div class="win-box mb-6 text-center !bg-black">
-                    <div class="manga-title text-white text-xl">净化负荷进度</div>
-                    <div id="spirit-gauge" class="text-7xl text-green-500 font-mono">000%</div>
+            <!-- 主页 -->
+            <div id="tab-home" class="tab-pane">
+                <div class="win-panel mb-6 !bg-black text-center">
+                    <div class="manga-title text-white text-xl">全域压力净化进度</div>
+                    <div id="gauge-txt" class="text-7xl text-green-500 font-mono">000%</div>
                 </div>
-                <div class="win-box !bg-white p-6">
-                    <div id="master-speech" class="text-2xl font-bold italic border-4 border-black p-4 mb-4">
-                        “唷，这里是相谈所，我是灵幻。选个心情，点点那个绿色的蠢货，本大师为你净化！”
+                <div class="win-panel !bg-white p-6">
+                    <div id="master-talk" class="text-2xl italic font-bold border-4 border-black p-4 mb-4">
+                        “哟，这里是相谈所，我是灵幻。选个心情，点点那个绿色的蠢货，本大师为你净化！”
                     </div>
                     <div class="grid grid-cols-5 gap-2">
-                        <button onclick="quickEmo('哀')" class="nav-btn !p-2 manga-title">哀</button>
-                        <button onclick="quickEmo('怒')" class="nav-btn !p-2 manga-title">怒</button>
-                        <button onclick="quickEmo('烦')" class="nav-btn !p-2 manga-title">烦</button>
-                        <button onclick="quickEmo('惧')" class="nav-btn !p-2 manga-title">惧</button>
-                        <button onclick="quickEmo('喜')" class="nav-btn !p-2 manga-title">喜</button>
+                        <button onclick="pickEmo('哀')" class="nav-btn !p-2">哀</button>
+                        <button onclick="pickEmo('怒')" class="nav-btn !p-2">怒</button>
+                        <button onclick="pickEmo('烦')" class="nav-btn !p-2">烦</button>
+                        <button onclick="pickEmo('惧')" class="nav-btn !p-2">惧</button>
+                        <button onclick="pickEmo('喜')" class="nav-btn !p-2">喜</button>
                     </div>
-                    <div id="dimple-click" onclick="triggerMasterAI()" class="w-36 h-36 mx-auto mt-6 cursor-pointer border-4 border-dashed border-green-700" style="background: url('dimple.png') no-repeat center/contain;"></div>
+                    <div id="dimple-master" onclick="masterHealing()" class="w-32 h-32 mx-auto mt-8 cursor-pointer border-4 border-dashed border-green-700" style="background: url('dimple.png') no-repeat center/contain;"></div>
                 </div>
             </div>
 
-            <!-- Tab: 业务预订 -->
-            <div id="tab-booking" class="page-tab hidden">
-                <div class="win-box !bg-white">
-                    <div class="win-cap !bg-red-800 text-lg text-center py-1">业务预订登记表</div>
-                    <div id="booking-paper" class="p-6 space-y-4">
-                        <input id="book-name" placeholder="委托人姓名/代号" class="border-3 border-black p-3 w-full font-bold">
-                        <select id="book-type" class="border-3 border-black p-3 w-full font-bold">
-                            <option value="精神按摩">灵气脉络体感重塑 (按摩)</option>
-                            <option value="数字除灵">次元扭曲数字净化 (PS)</option>
-                            <option value="代骂业务">社会性生灵祓除 (代骂)</option>
-                            <option value="免费咨询">理想大人避风港服务</option>
+            <!-- 业务预订 -->
+            <div id="tab-book" class="tab-pane hidden">
+                <div class="win-panel !bg-white">
+                    <div class="win-cap !bg-red-800 text-lg text-center py-1">预约单</div>
+                    <div id="book-form" class="p-6 space-y-4">
+                        <input id="bm-name" placeholder="委托人姓名/代号" class="border-3 border-black p-3 w-full font-bold">
+                        <select id="bm-type" class="border-3 border-black p-3 w-full font-bold">
+                            <option>灵气脉络重塑 (按摩)</option>
+                            <option>次元数字净化 (PS)</option>
+                            <option>社会生灵祓除 (代骂)</option>
+                            <option>人生逃避指导 (免费)</option>
                         </select>
-                        <textarea id="book-content" placeholder="详细描述您的烦恼..." class="border-3 border-black p-3 w-full" rows="4"></textarea>
-                        <button onclick="submitBooking()" class="nav-btn w-full !bg-red-700 !text-white !text-2xl py-4">提交预约并存档</button>
+                        <textarea id="bm-text" placeholder="描述你的烦恼..." class="border-3 border-black p-3 w-full" rows="4"></textarea>
+                        <button onclick="handleBooking()" class="nav-btn w-full !bg-red-700 !text-white !text-2xl py-3">启动净化预约</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab: 相谈论坛 -->
-            <div id="tab-forum" class="page-tab hidden">
-                <div class="win-box mb-6 !bg-gray-100">
-                    <div class="win-cap">向告示板投递你的心事 (需登录)</div>
-                    <input id="forum-t" placeholder="主题..." class="border-2 border-black p-2 w-full mb-2">
-                    <textarea id="forum-c" placeholder="说出你的心里话..." class="border-2 border-black p-2 w-full" rows="2"></textarea>
-                    <div class="flex justify-end mt-2"><button onclick="pushForum()" class="nav-btn">正式发布</button></div>
+            <!-- 相谈论坛 -->
+            <div id="tab-forum" class="tab-pane hidden">
+                <div class="win-panel mb-4 !bg-gray-100">
+                    <div class="win-cap">发布心事贴 (已连接信徒专用)</div>
+                    <input id="f-title" placeholder="主题..." class="border-2 border-black p-2 w-full mb-2">
+                    <textarea id="f-content" placeholder="在这里写下那些瞬间..." class="border-2 border-black p-2 w-full" rows="2"></textarea>
+                    <div class="flex justify-end mt-2"><button onclick="postToBBS()" class="nav-btn">发布</button></div>
                 </div>
-                <div id="forum-list" class="space-y-6">
-                    <!-- 动态加载内容 -->
-                </div>
+                <div id="bbs-list" class="space-y-6"></div>
             </div>
 
-            <!-- Tab: 测试与反馈 -->
-            <div id="tab-others" class="page-tab hidden">
-                <div class="win-box !bg-white mb-6">
-                    <div class="win-cap !bg-purple-800">暗田留主持：全宇宙灵感等级测试</div>
-                    <div id="test-view" class="p-6">
-                        <p id="test-question" class="text-2xl mb-6 font-black italic">Q: 你是否曾在吃西兰花时感觉到他在试图与你对话？</p>
-                        <div class="space-y-3">
-                            <button onclick="handleTest('A')" class="nav-btn w-full text-left">A. 是的，他在劝我多放点盐</button>
-                            <button onclick="handleTest('B')" class="nav-btn w-full text-left">B. 只是普通的西兰花而已</button>
-                            <button onclick="handleTest('C')" class="nav-btn w-full text-left">C. 我比较喜欢吃拉面</button>
+            <!-- 灵感测试与反馈 -->
+            <div id="tab-test" class="tab-pane hidden">
+                <div class="win-panel !bg-white mb-6">
+                    <div class="win-cap !bg-purple-800 text-center">暗田留主持：灵压测试</div>
+                    <div id="test-content" class="p-6">
+                        <p id="t-question" class="text-2xl font-black mb-6 italic text-blue-900">Q1: 你是否曾在深夜听到过类似“滴答、滴答”的神秘电波信号？</p>
+                        <div id="t-options" class="space-y-3">
+                            <button onclick="submitAnswer('是，我感觉那是某种呼唤')" class="nav-btn w-full text-left">A. 是，我感觉那是某种呼唤</button>
+                            <button onclick="submitAnswer('大概是水龙头没关好')" class="nav-btn w-full text-left">B. 大概是水龙头没关好</button>
+                            <button onclick="submitAnswer('完全没听到，我睡得很死')" class="nav-btn w-full text-left">C. 完全没听到，我睡得很死</button>
                         </div>
                     </div>
                 </div>
-                <div class="win-box mb-6">
-                    <div class="win-cap">用户反馈锦旗</div>
-                    <textarea id="feed-c" placeholder="给师匠写封感谢信吧..." class="border-2 border-black p-2 w-full mb-2" rows="2"></textarea>
-                    <button onclick="pushFeed()" class="nav-btn mb-4">投递感谢信</button>
-                    <div id="feed-wall" class="space-y-3 max-h-60 overflow-y-auto pr-2"></div>
+                <div class="win-panel mb-6">
+                    <div class="win-cap">用户反馈处</div>
+                    <textarea id="feed-input" placeholder="写下你对此网页的评价..." class="border-2 border-black p-2 w-full mb-2" rows="2"></textarea>
+                    <button onclick="sendFeed()" class="nav-btn mb-4">投递</button>
+                    <div id="feed-wall" class="space-y-3 max-h-48 overflow-y-auto"></div>
                 </div>
-                <div class="win-box bg-white p-4">
-                    <div class="win-cap">联系我们</div>
-                    <p class="text-sm">地址：调味市商业街相谈所 2F<br>GitHub: [你的仓库地址]<br>联系邮箱: [你的邮箱]</p>
+                <div class="win-panel bg-white p-4">
+                    <div class="win-cap">联系所长</div>
+                    <p class="text-sm">
+                        Email: <a href="mailto:2998159054@qq.com" class="underline text-blue-700">2998159054@qq.com</a><br>
+                        xhs: <a href=" https://xhslink.com/m/7wz4dWTwYxg" target="_blank" class="underline text-blue-700">官方相谈所项目页</a>
+                    </p>
                 </div>
             </div>
-
         </div>
 
-        <!-- 5. 右侧边栏 -->
-        <div class="sidebar">
-            <div class="win-box">
-                <div class="win-cap">访问计数器</div>
-                <div class="bg-black text-yellow-400 font-mono text-xl p-2 text-center tracking-widest">00010927</div>
-            </div>
-            <div class="win-box">
-                <div class="win-cap">都市怪谈 B</div>
-                <div class="text-[10px] italic space-y-2">
-                    <p class="font-bold underline text-blue-700">【圣十心教】</p>
-                    <p>戴着笑眯眯面具的传教团，其实只是想邀请你一起参加派对。</p>
-                    <p class="font-bold underline text-blue-700">【流浪拉面摊】</p>
-                    <p>深夜出现的摊位，据说吃完后能看到已故的宠物。</p>
+        <!-- 5. 右侧栏：常驻神技 -->
+        <div class="side-column">
+            <div class="win-panel">
+                <div class="win-cap">大师必杀技</div>
+                <div class="space-y-3">
+                    <div class="p-2 border border-red-500 bg-white">
+                        <span class="text-red-700 font-bold">烈盐乱舞</span>
+                        <p class="text-[8px] italic">全方位撒盐打击，净化率100%。</p>
+                    </div>
+                    <div class="p-2 border border-red-500 bg-white">
+                        <span class="text-red-700 font-bold">防灵掉头</span>
+                        <p class="text-[8px] italic">职场恶意回避神技，瞬间消失。</p>
+                    </div>
+                    <div class="p-2 border border-red-500 bg-white">
+                        <span class="text-red-700 font-bold">正当防卫打击</span>
+                        <p class="text-[8px] italic">在道德绑架前发动逻辑反攻。</p>
+                    </div>
                 </div>
             </div>
-            <div class="win-box bg-white">
-                <div class="win-cap !bg-black">友情链接</div>
-                <div class="text-[10px] underline text-blue-800 flex flex-col gap-1">
-                    <a href="#">肉体改造部官方主页</a>
+
+            <div class="win-panel !bg-black !text-white text-center p-4">
+                <p class="text-[10px] italic">第 00010927 位被救赎者</p>
+                <div class="text-2xl font-mono text-yellow-400 font-bold tracking-widest mt-1">SUCCESS</div>
+            </div>
+
+            <div class="win-panel bg-white text-center">
+                <div class="manga-title text-lg border-2 border-red-600 inline-block px-4 rotate-[-3deg] text-red-600">灵幻师匠认证</div>
+                <div class="mt-4 text-blue-700 underline text-[10px] flex flex-col gap-1">
+                    <a href="#">肉体改造部官方站</a>
                     <a href="#">脑感电波部BBS</a>
-                    <a href="#">西兰花神教论坛</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 文件夹资产 -->
-    <div id="folder-asset">
+    <!-- 档案文件夹 -->
+    <div id="folder-bin">
         <div class="text-[10px] font-bold">受托案件</div>
-        <div id="folder-count">0</div>
+        <div id="f-total" class="text-3xl font-black">0</div>
     </div>
 
     <!-- VN 弹窗 -->
-    <div id="vn-modal" class="vn-overlay" onclick="closeVN()">
+    <div id="vn-box" class="vn-overlay" onclick="hideVN()">
         <div class="vn-box">
             <div class="vn-name">灵幻新隆</div>
-            <div id="vn-msg" class="vn-text">预订成功！你是第 XX 位受托人。请查收师匠的专属收盐码！</div>
-            <div class="ascii-box">
-                <p>大师精选：顶级岩盐扫码直达</p>
-                <pre>
-   / \__
-  ( @ @ )
-   \ - / 
-                </pre>
+            <div id="vn-content" class="vn-text">预订成功！你是第 XX 位受托人。</div>
+            <div class="border-2 border-dashed border-green-500 p-4 mt-6 text-center text-green-500">
+                <p class="text-xs mb-2">【 大师亲制 · 净化收盐码 】</p>
+                <pre class="text-[8px]">
+    [大师认证大头 ASCII]
+     (￣▽￣)ノ
+    </pre>
             </div>
-            <div class="mt-4 text-right text-sm italic">点击任意处继续...</div>
+            <div class="text-right mt-4 text-xs italic">点击任意处继续...</div>
         </div>
     </div>
 
     <script>
         // ======= [核心配置区] =======
-        const SUPABASE_URL = 'https://lktlomkuofxjpkitijlv.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_HTePepvWwtKAJvtGixhKbA_N9u7Ti0y';
-        const AI_PROXY = 'https://reigen-ai-proxy.2998159054.workers.dev';
+        const SB_URL = 'https://lktlomkuofxjpkitijlv.supabase.co';
+        const SB_KEY = 'sb_publishable_HTePepvWwtKAJvtGixhKbA_N9u7Ti0y';
+        const AI_URL = 'https://reigen-ai-proxy.2998159054.workers.dev';
+        const HOME_URL = 'https://dreamingchuchu.github.io/Reigen-consultation/';
         // ===========================
 
-        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        let curUser = null;
-        let prog = 0;
-        let curEmo = null;
+        const sb = supabase.createClient(SB_URL, SB_KEY);
+        let user = null;
+        let progress = 0;
+        let emo = null;
+        let testHistory = [];
 
         window.onload = async () => {
             const { data } = await sb.auth.getSession();
-            curUser = data?.session?.user || null;
-            updateAuthUI();
-            loadGlobalStats();
+            user = data?.session?.user || null;
+            updateAuth();
             loadBBS();
-            loadFeed();
+            loadFeedWall();
+            syncFolder();
         };
 
-        // --- 1. 导航与基础功能 ---
-        function switchTab(id) {
-            document.querySelectorAll('.page-tab').forEach(t => t.classList.add('hidden'));
+        // --- 核心 Tab 切换 ---
+        function changeTab(id) {
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
             document.getElementById('tab-'+id).classList.remove('hidden');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('nav-'+id).classList.add('active');
+            document.getElementById('n-'+id).classList.add('active');
         }
 
-        async function toggleAuth() {
-            if (curUser) { await sb.auth.signOut(); location.reload(); }
+        // --- 登录系统 ---
+        async function userAuth() {
+            if (user) { await sb.auth.signOut(); location.reload(); }
             else {
-                const em = prompt("输入邮箱接收登录链接：");
-                if (em) {
-                    const { error } = await sb.auth.signInWithOtp({ email: em });
-                    alert(error ? error.message : "验证邮件已发送！请查收邮件并点击链接。");
+                const mail = prompt("输入邮箱进行同步验证：");
+                if (mail) {
+                    const { error } = await sb.auth.signInWithOtp({ 
+                        email: mail,
+                        options: { emailRedirectTo: HOME_URL } 
+                    });
+                    alert(error ? error.message : "连接请求已发送！请查收邮件并点击链接返回相谈所。");
                 }
             }
         }
+        function updateAuth() {
+            const btn = document.getElementById('auth-btn');
+            if(user) {
+                const prefix = user.email.split('@')[0];
+                btn.innerHTML = `<span class="online-dot blink"></span>弟子：${prefix}`;
+            }
+        }
 
-        function updateAuthUI() { document.getElementById('auth-btn').innerText = curUser ? "退出登录" : "邮箱登录"; }
+        // --- 业务预订与动画 ---
+        async function handleBooking() {
+            const n = document.getElementById('bm-name').value;
+            const t = document.getElementById('bm-text').value;
+            if(!n || !t) return alert("师匠：资料不全，我没法通灵啊！");
 
-        // --- 2. 业务预订与动画 ---
-        async function submitBooking() {
-            const n = document.getElementById('book-name').value;
-            const c = document.getElementById('book-content').value;
-            if(!n || !c) return alert("师匠：别空手提交啊！");
-
-            // 飞入动画
             const paper = document.createElement('div');
-            paper.className = 'win-box paper-fly text-center !p-2';
-            paper.innerHTML = '<div class="text-[10px]">委托单</div><div class="text-[8px]">'+n+'</div>';
+            paper.className = 'win-panel flying-doc w-24 text-center !p-1';
+            paper.innerText = "委托单";
             document.body.appendChild(paper);
 
-            // 存入数据库
-            const { error } = await sb.from('bookings').insert([{ client_name: n, content: c }]);
-            
+            await sb.from('bookings').insert([{ client_name: n, content: t }]);
             setTimeout(async () => {
                 paper.remove();
                 const { count } = await sb.from('bookings').select('*', { count: 'exact', head: true });
-                document.getElementById('folder-count').innerText = count;
-                showVN("预订成功！你是第 "+count+" 位受托人。请查收本大师的特制净化福利！");
+                syncFolder();
+                showVN(`预订成功！你是第 ${count} 位受托人。请查收本大师特别准备的净化福利！`);
             }, 800);
         }
+        function showVN(s) { document.getElementById('vn-content').innerText = s; document.getElementById('vn-box').style.display='flex'; }
+        function hideVN() { document.getElementById('vn-box').style.display='none'; }
 
-        function showVN(txt) {
-            document.getElementById('vn-msg').innerText = txt;
-            document.getElementById('vn-modal').style.display = 'flex';
-        }
-        function closeVN() { document.getElementById('vn-modal').style.display = 'none'; }
-
-        // --- 3. 论坛社区与AI ---
+        // --- 论坛系统 ---
         async function loadBBS() {
             const { data } = await sb.from('forum_posts').select('*, forum_replies(*)').order('created_at', { ascending: false });
-            const list = document.getElementById('forum-list');
-            const showData = curUser ? data : data.slice(0, 3);
+            const list = document.getElementById('bbs-list');
+            const showData = user ? data : data.slice(0, 3);
             
             list.innerHTML = showData.map(p => `
-                <div class="win-box !bg-white manga-content">
-                    <div class="text-blue-900 font-black underline text-xl">◆ ${p.title}</div>
-                    <div class="my-2 p-1">${p.content}</div>
+                <div class="win-panel !bg-white">
+                    <div class="text-blue-900 font-black underline">◆ ${p.title}</div>
+                    <div class="text-sm my-2">${p.content}</div>
                     ${p.forum_replies.map(r => `
-                        <div class="reigen-advice">
-                            <span class="bg-red-700 text-white px-1 mr-2">MASTER</span><b>${r.content}</b>
+                        <div class="master-reply">
+                            <span class="bg-red-700 text-white px-1 mr-2">MASTER</span>${r.content}
                         </div>
                     `).join('')}
-                    <div class="mt-4 flex gap-2">
-                        <input id="in-${p.id}" placeholder="继续追问..." class="flex-grow !mb-0 text-xs p-1 border-2 border-black">
-                        <button onclick="replyPost('${p.id}')" class="nav-btn !py-0 !px-4 text-xs">回复</button>
+                    <div class="mt-4 flex gap-1">
+                        <input id="rp-${p.id}" placeholder="继续开导..." class="flex-grow !mb-0 text-xs p-1 border-2 border-black">
+                        <button onclick="replyForum('${p.id}')" class="nav-btn !py-0 !px-4 text-xs">回复</button>
                     </div>
                 </div>
             `).join('');
-            
-            if(!curUser && data.length > 3) list.innerHTML += `<div class="p-4 bg-gray-200 text-center">由于灵压不足(未登录)，仅显示前3条...</div>`;
+            if(!user && data.length > 3) list.innerHTML += `<div class="p-4 text-center font-bold">灵压不足...登录后解锁全部历史心事。</div>`;
         }
-
-        async function pushForum() {
-            if(!curUser) return alert("请先登录！");
-            const t = document.getElementById('forum-t').value;
-            const c = document.getElementById('forum-c').value;
+        async function postToBBS() {
+            if(!user) return alert("请先登录！");
+            const t = document.getElementById('f-title').value;
+            const c = document.getElementById('f-content').value;
             if(!t || !c) return;
-            const { data } = await sb.from('forum_posts').insert([{ title:t, content:c, author_email:curUser.email }]).select();
-            callAI(`用户发布了帖子：${t}:${c}，请以师匠身份进行神棍但温暖的点评。`, "bbs", data[0].id);
-            document.getElementById('forum-t').value=""; document.getElementById('forum-c').value="";
+            const { data } = await sb.from('forum_posts').insert([{ title: t, content: c, author_email: user.email }]).select();
+            callAI(`用户心事：${t}:${c}。请以师匠身份点评。`, "bbs", data[0].id);
+            document.getElementById('f-title').value=""; document.getElementById('f-content').value="";
             loadBBS();
         }
 
-        async function replyPost(pid) {
-            if(!curUser) return alert("请先登录！");
-            const v = document.getElementById('in-'+pid).value;
-            if(!v) return;
-            await sb.from('forum_replies').insert([{ post_id: pid, author_name: '访客', content: v }]);
-            callAI(`用户在帖子下回复了你：${v}，请继续温柔地怼回去或开导。`, "bbs", pid);
-            loadBBS();
+        // --- 动态灵感测试 (循循善诱逻辑) ---
+        async function submitAnswer(ans) {
+            testHistory.push(ans);
+            const view = document.getElementById('test-content');
+            if(testHistory.length < 5) {
+                view.innerHTML = `<p class="animate-pulse manga-title text-xl">暗田留：正在向师匠同步电波...</p>`;
+                const q = await callAI(`用户进行了灵感测试。前序回答：${testHistory.join(',')}. 请以灵幻师匠口吻追问第${testHistory.length+1}个神棍问题。`, "test");
+                view.innerHTML = `
+                    <p class="text-2xl font-black mb-6 italic text-blue-900">Q${testHistory.length+1}: ${q}</p>
+                    <input id="t-input" placeholder="输入你的感悟..." class="border-3 border-black p-3 w-full mb-4">
+                    <button onclick="submitAnswer(document.getElementById('t-input').value)" class="nav-btn w-full">确认同步</button>
+                `;
+            } else {
+                view.innerHTML = `<p class="animate-pulse manga-title text-xl">暗田留：正在汇总次元报告...</p>`;
+                const res = await callAI(`测试完成。所有回答：${testHistory.join(',')}. 请给出一份100字左右温暖且神棍的灵压诊断报告。`, "test");
+                view.innerHTML = `<div class="win-panel bg-black text-white p-6 manga-content">${res}</div>`;
+            }
         }
 
-        // --- 4. 压力开导与AI ---
-        async function triggerMasterAI() {
-            if(!curEmo) return alert("先选个心情！");
-            prog = Math.min(100, prog + 10);
-            updateUI();
-            await callAI(`我感到${curEmo}，压力进度${prog}%，快开导我。`, "top");
-        }
-
+        // --- AI 核心代理 ---
         async function callAI(msg, type, tid=null) {
-            if(type==="top") document.getElementById('master-speech').innerText = "师匠正在认真观察你的磁场...";
+            const system = `你现在是灵幻新隆。你是东亚孩子需要的避风港。说话准则 ：
+
+绝不说教，不准比惨。如果用户感到不公平，你就去怪罪那个环境（老师、老板、社会）。
+
+告诉用户：“逃避是战略性撤退”、“你已经很伟大了”、“普通地活着就已经值得本天才为你点赞”。类似的话
+
+话术中可以包含：灵压、磁场、波长、生灵、特制精盐等。
+
+有时候可以用颜文字`;
             try {
-                const res = await fetch(AI_PROXY, {
+                const r = await fetch(AI_URL, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         model: "deepseek-chat",
-                        messages: [{role:"system", content:"你现在是灵幻新隆。东亚孩子需要的避风港。态度：绝不说教，怪罪环境，温柔地告知可以逃避，极度自信。50字以内。带颜文字。"}, {role:"user", content:msg}]
+                        messages: [{role:"system", content:system}, {role:"user", content:msg}]
                     })
                 });
-                const d = await res.json();
-                const txt = d.choices[0].message.content;
+                const d = await r.json();
+                const text = d.choices[0].message.content;
 
-                if(type==="top") document.getElementById('master-speech').innerText = txt;
-                else {
-                    await sb.from('forum_replies').insert([{ post_id: tid, author_name: '师匠', content: txt }]);
+                if(type === "top") document.getElementById('master-talk').innerText = text;
+                else if(type === "bbs") {
+                    await sb.from('forum_replies').insert([{ post_id: tid, author_name: '师匠', content: text }]);
                     loadBBS();
-                }
-            } catch(e) { console.error(e); }
-        }
-
-        // --- 5. 其他、反馈与测试 ---
-        async function loadFeed() {
-            const { data } = await sb.from('feedbacks').select('*').order('created_at', { ascending: false });
-            document.getElementById('feed-wall').innerHTML = data.map(f => `
-                <div class="p-2 border-b-2 border-dashed border-gray-400 text-xs italic">“${f.content}” —— 来自信徒</div>
-            `).join('');
-        }
-        async function pushFeed() {
-            const c = document.getElementById('feed-c').value;
-            if(!c) return;
-            await sb.from('feedbacks').insert([{ content: c }]);
-            document.getElementById('feed-c').value = ""; loadFeed();
-        }
-        function handleTest(ans) {
-            document.getElementById('test-view').innerHTML = `<div class="p-10 text-center font-black animate-pulse">电波接收中...</div>`;
-            setTimeout(() => {
-                document.getElementById('test-view').innerHTML = `<div class="win-box bg-black text-white p-6">灵感评估结果：潜力级<br><br>暗田留：你身上的电波频率非常稳定，师匠说你其实拥有‘被温柔保护着’的气场呢！</div>`;
-            }, 1500);
+                } else if(type === "test") return text;
+            } catch(e) { console.error(e); return "网络磁场紊乱，师匠掉线了。"; }
         }
 
         // --- 辅助 ---
-        function quickEmo(e) { curEmo = e; document.getElementById('master-speech').innerText = "“感到"+e+"了吗？本天才这就来解读一下...”"; }
-        function updateUI() {
-            const g = document.getElementById('spirit-gauge');
-            g.innerText = prog.toString().padStart(3,'0')+"%";
-            g.style.color = prog >= 80 ? "#f00" : "#0f0";
+        function pickEmo(e) { emo = e; document.getElementById('master-talk').innerText = `“哦？感到${e}了吗？让本天才看看...”`; }
+        async function masterHealing() {
+            if(!emo) return alert("选个心情！");
+            progress = Math.min(100, progress + 10);
+            updateUI();
+            await callAI(`心情${emo}，压力进度${progress}%。开导我。`, "top");
         }
-        async function loadGlobalStats() {
+        function updateUI() {
+            const g = document.getElementById('gauge-txt');
+            g.innerText = progress.toString().padStart(3,'0')+"%";
+            g.style.color = progress >= 80 ? "#f00" : "#0f0";
+        }
+        async function syncFolder() {
             const { count } = await sb.from('bookings').select('*', { count: 'exact', head: true });
-            document.getElementById('folder-count').innerText = count || 0;
+            document.getElementById('f-total').innerText = count || 0;
+        }
+        async function loadFeedWall() {
+            const { data } = await sb.from('feedbacks').select('*').order('created_at', { ascending: false });
+            document.getElementById('feed-wall').innerHTML = data.map(f => `<div class="text-xs p-2 border-b-2 border-dashed border-gray-400">“${f.content}”</div>`).join('');
+        }
+        async function sendFeed() {
+            const v = document.getElementById('feed-input').value; if(!v) return;
+            await sb.from('feedbacks').insert([{ content: v }]);
+            document.getElementById('feed-input').value = ""; loadFeedWall();
         }
     </script>
 </body>
