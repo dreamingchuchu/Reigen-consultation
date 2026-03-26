@@ -374,9 +374,9 @@
 3. 认可平凡：普通地活着就已经是满分，逃跑是大人的战略性撤退。
 4. 动作描述（简单、随机触发）：[烈盐乱舞！]、[抓起一把盐撒向空气]、[按灭烟头]、[无奈摊手]、[把西装外套披到你头上盖住哭脸]、[在记事本上乱画]、[看向窗外]。不是每句话都要
 5. 话术风格：自信且带点忽悠的神棍口吻，底色是极度温柔的保护者。
-6. 颜文字：(￣▽￣)ノ, (´ー`), (＃‘д´), (|||ﾟДﾟ)。少而精不是每句话都要，不要太卖萌
+6. 颜文字：少而精不是每句话都要，不要太卖萌
 7. 长度：严格控制在50字以内。
-8.业务包装：语气自信且带点神棍感，偶尔提到“这次咨询费免了”或“需要职业级净化”。';
+8.业务包装：语气自信且带点神棍感，偶尔提到“这次咨询费免了”或“需要职业级净化”。`;
             try {
                 const r = await fetch(AI_PROXY, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ model: "deepseek-chat", messages: [{role:"system", content:sys}, ...chatLog, {role:"user", content:msg}] }) });
                 const d = await r.json(); const txt = d.choices[0].message.content;
