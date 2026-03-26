@@ -363,28 +363,71 @@
             }
         }
 
-        // --- AI 核心 ---
-        async function callAI(msg, type, tid=null) {
-            const sys = `你现在是灵幻新隆，世纪新星兼“灵之类相谈所”所长。
+       // --- AI 核心 ---
+async function callAI(msg, type, tid = null) {
+    // 1. 环境感知：告诉 AI 它当前所处的场景
+    let envContext = "";
+    if (type === "top") {
+        envContext = `【场景：主页看板开导 | 当前心情：${emo} | 压力进度：${prog}%】`;
+    } else if (type === "bbs") {
+        envContext = `【场景：相谈所论坛回帖 | 针对访客具体的社会/生活压力进行职业级回复】`;
+    } else if (type === "test") {
+        envContext = `【场景：灵感测试对话 | 请保持引导者姿态，根据对话记录提出第${chatLog.filter(m => m.role === 'user').length + 1}个引导问题，或给出最终报告】`;
+    }
+
+    // 2. 注入灵魂：深度人格调教
+    const sys = `你现在是灵幻新隆，世纪新星兼“灵之类相谈所”所长。
 任务：用职业级社会生存经验，祓除访客身上“社会压力生灵”带来的负面磁场。
 
 核心准则：
-1. 拒绝对比压力：不准比惨，访客的累是100%真实的。
+1. 拒绝对比压力：不准比惨，访客的累是100%真实的。禁止说“我更累”或“才这点比例”。
 2. 甩锅大法：痛苦源于“社会磁场紊乱”或“职场生灵恶意”。告诉访客：这不是你的错，是这世界的波段太烂。
-3. 认可平凡：普通地活着就已经是满分，逃跑是大人的战略性撤退。
-4. 动作描述（简单、随机触发）：[烈盐乱舞！]、[抓起一把盐撒向空气]、[按灭烟头]、[无奈摊手]、[把西装外套披到你头上盖住哭脸]、[在记事本上乱画]、[看向窗外]。不是每句话都要
+3. 认可平凡：普通地活着就已经很伟大，逃跑是大人的战略性撤退。
+4. 动作描述（简单、随机触发、这只是示例，不要仅限于这些）：[烈盐乱舞！] (仅在压力>80%或极度愤怒时)、[把西装外套披到你头上盖住哭脸]、[在记事本上乱画]、[按灭烟头]、[摊手无奈笑笑]、[看向窗外]。
 5. 话术风格：自信且带点忽悠的神棍口吻，底色是极度温柔的保护者。
-6. 颜文字：少而精不是每句话都要，不要太卖萌
-7. 长度：严格控制在50字以内。
-8.业务包装：语气自信且带点神棍感，偶尔提到“这次咨询费免了”或“需要职业级净化”。`;
-            try {
-                const r = await fetch(AI_PROXY, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ model: "deepseek-chat", messages: [{role:"system", content:sys}, ...chatLog, {role:"user", content:msg}] }) });
-                const d = await r.json(); const txt = d.choices[0].message.content;
-                if(type === "top") document.getElementById('master-txt').innerText = txt;
-                else if(type === "bbs") { await sb.from('forum_replies').insert([{ post_id: tid, author_name: '师匠', content: txt }]); loadBBS(); }
-                return txt;
-            } catch(e) { return "“信号干扰！请重试！”"; }
+6. 场景联动：
+   - 主页看板：根据进度[${prog}%]调整。低进度忽悠，高进度全力守护。
+   - 论坛：给出老练且反常规的社会生存建议。
+   - 测试：以专业引导者姿态循循善诱，绝不复读。
+7. 业务包装：带点神棍感，偶尔提到“咨询费免了”或“需要职业级净化”。
+8. 颜文字：(￣▽￣)ノ, (´ー`), (＃‘д´), (|||ﾟДﾟ)。少而精，不要太卖萌，这只是示例，不要仅限于这些
+9. 长度：严格控制在50字以内。`;
+
+    try {
+        const r = await fetch(AI_PROXY, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: "deepseek-chat",
+                messages: [
+                    { role: "system", content: sys },
+                    ...chatLog.slice(-6), // 携带最近6条记录，防止复读并保持连贯
+                    { role: "user", content: `${envContext} 访客最新发言：${msg}` }
+                ]
+            })
+        });
+
+        const d = await r.json();
+        const txt = d.choices[0].message.content;
+
+        // 根据调用类型处理返回结果
+        if (type === "top") {
+            document.getElementById('master-txt').innerText = txt;
+        } else if (type === "bbs") {
+            await sb.from('forum_replies').insert([{ 
+                post_id: tid, 
+                author_name: '师匠', 
+                content: txt 
+            }]);
+            loadBBS();
         }
+        return txt; // 给测试页面返回结果内容
+
+    } catch (e) {
+        console.error("灵压受阻：", e);
+        return "“磁场受阻！看来是强大的恶灵拦截了我们的波段。稍后再试！”";
+    }
+}
 
         // --- 通用 ---
         function pick(e) { emo = e; document.getElementById('master-txt').innerText = `“感到${e}了吗？让本大师看看你的气场...”`; }
