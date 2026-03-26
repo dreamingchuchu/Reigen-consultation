@@ -366,13 +366,18 @@
        // --- AI 核心 ---
 async function callAI(msg, type, tid = null) {
     // 1. 环境感知：告诉 AI 它当前所处的场景
-    let envContext = "";
     if (type === "top") {
-        envContext = `【场景：主页看板开导 | 当前心情：${emo} | 压力进度：${prog}%】`;
+        envContext = `【场景：看板即时诊断。访客目前情绪为${emo}。请根据其隐形压力程度调整语气，压力越大你表现得越可靠。严禁提及任何百分比数字！】`;
     } else if (type === "bbs") {
-        envContext = `【场景：相谈所论坛回帖 | 针对访客具体的社会/生活压力进行职业级回复】`;
+        envContext = `【场景：相谈所论坛。针对访客具体的烦恼，给出老练、市侩但清醒的‘大人建议’。】`;
     } else if (type === "test") {
-        envContext = `【场景：灵感测试对话 | 请保持引导者姿态，根据对话记录提出第${chatLog.filter(m => m.role === 'user').length + 1}个引导问题，或给出最终报告】`;
+        const userQCount = chatLog.filter(m => m.role === 'user').length;
+        if (userQCount < 5) {
+            envContext = `【场景：灵感测试提问。你正在探测对方的灵压。请根据之前的对话，提出第${userQCount + 1}个‘角度刁钻、神棍色彩浓厚’的引导性问题。不要复读，要循循善诱。】`;
+        } else {
+            envContext = `【场景：终极灵感报告。测试已结束。请出一份‘大师级诊断书’。
+            格式要求：[灵压等级：XXX] + [一段一本正经的胡说八道] + [最后给出一句真正温暖、让人豁然开朗的大人赠言]。严禁提及数字！】`;
+        }
     }
 
     // 2. 注入灵魂：深度人格调教
@@ -425,7 +430,30 @@ async function callAI(msg, type, tid = null) {
         // --- 通用 ---
         function pick(e) { emo = e; document.getElementById('master-txt').innerText = `“感到${e}了吗？让本大师看看你的气场...”`; }
         async function heal() { if(!emo || !await canCallAI()) return; prog = Math.min(100, prog+10); updateGauge(); await callAI(`心情${emo}，负荷${prog}%。`, "top"); }
-        function updateGauge() { const g = document.getElementById('gauge'); g.innerText = prog.toString().padStart(3,'0')+"%"; g.style.color = prog >= 80 ? "#f00" : "#0f0"; }
+        function updateGauge() {
+    const g = document.getElementById('gauge');
+    const masterBox = document.getElementById('master-txt');
+
+    if (prog >= 100) {
+        // 1. 进入爆发显示状态
+        g.innerText = "???%";
+        g.style.color = "#f00";
+        g.classList.add('blink'); // 触发CSS中的闪烁动画
+
+        // 3. 延迟2.5秒后自动归零，不刷新网页
+        setTimeout(() => {
+            prog = 0; // 逻辑归零
+            g.classList.remove('blink');
+            updateGauge(); // 重新调用自己，恢复 000% 显示
+            masterBox.innerText = "“呼... 磁场已经彻底净化。感觉清爽多了吧？休息好了就继续出发吧。(￣▽￣)ノ”";
+        }, 1000);
+
+    } else {
+        // 4. 正常的百分比显示逻辑
+        g.innerText = prog.toString().padStart(3, '0') + "%";
+        g.style.color = prog >= 80 ? "#f00" : "#0f0";
+    }
+}
         async function syncStats() { try { const { count } = await sb.from('bookings').select('*', { count: 'exact', head: true }); document.getElementById('f-num').innerText = count || 0; } catch(e){} }
         async function loadFeeds() { try { const { data } = await sb.from('feedbacks').select('*').order('created_at', { ascending: false }); document.getElementById('feed-wall').innerHTML = data.map(f => `<div class="border-b-2 border-dashed border-gray-400 p-2 text-xs">“${f.content}”</div>`).join(''); } catch(e){} }
         async function doFeed() { const v = document.getElementById('feed-in').value; if(!v) return; await sb.from('feedbacks').insert([{ content: v }]); document.getElementById('feed-in').value=""; loadFeeds(); }
