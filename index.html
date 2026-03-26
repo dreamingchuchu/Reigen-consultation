@@ -60,8 +60,20 @@
         .nav-btn.active { background: #000080; color: #fff; border-style: inset; }
         .online-dot { width: 10px; height: 10px; background: #f00; border-radius: 50%; display: inline-block; margin-right: 8px; box-shadow: 0 0 8px #f00; }
 
-        /* 文件夹动效 */
-        #folder-bin { position: fixed; bottom: 30px; right: 30px; width: 110px; height: 110px; background: #DAA520; border: 4px solid #000; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 8px 8px 0 #000; z-index: 999; }
+        /* 归档动效 */
+        @keyframes fly-to-bottom {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(200px) scale(0.1); opacity: 0; }
+        }
+        .paper-fly { animation: fly-to-bottom 0.8s forwards ease-in; position: absolute; left: 40%; z-index: 50; background: white; border: 2px solid #000; padding: 10px; }
+
+        /* 文件夹样式 - 存于申请表下方 */
+        #folder-bin { width: 140px; height: 120px; background: #DAA520; border: 4px solid #000; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 8px 8px 0 #000; margin: 30px auto; position: relative; }
+
+        /* 论坛折叠 */
+        .replies-container { max-height: 200px; overflow: hidden; position: relative; transition: max-height 0.3s; }
+        .replies-container.expanded { max-height: none; }
+        .expand-hint { color: blue; text-decoration: underline; font-size: 12px; cursor: pointer; text-align: center; display: block; margin-top: 5px; }
 
         /* VN 弹窗 */
         .vn-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; display: none; align-items: flex-end; padding: 60px; }
@@ -91,7 +103,7 @@
         <!-- 左侧栏：常驻内容 -->
         <div class="side-bar">
             <div class="win-box">
-                <div class="win-header">官方净化套餐 (具体价目)</div>
+                <div class="win-header">净化套餐 </div>
                 <div class="text-sm space-y-2">
                     <div class="flex justify-between border-b border-gray-400 pb-1"><span>● 灵气脉络体感重塑</span><span class="text-red-700">￥8k</span></div>
                     <div class="flex justify-between border-b border-gray-400 pb-1"><span>● 次元数字净化(PS)</span><span class="text-red-700">￥3k</span></div>
@@ -103,7 +115,7 @@
                 <div class="win-header">职员名录</div>
                 <div class="text-xs space-y-2 leading-tight">
                     <p><b>灵幻新隆</b>：世纪之新星，全能所长。</p>
-                    <p><b>影山茂夫</b>：首席弟子，除灵与打扫卫生的主力军。。</p>
+                    <p><b>影山茂夫</b>：首席弟子，除灵与打扫卫生主力军。</p>
                     <p><b>芹泽克也</b>：资深社员，正处于职场常识补习阶段，负责社会化沟通。</p>
                     <p><b>暗田留</b>：名誉秘书，电波部部长，宇宙联络员。</p>
                 </div>
@@ -141,7 +153,7 @@
             </div>
 
             <div id="tab-book" class="hidden">
-                <div class="win-box !bg-white">
+                <div class="win-box !bg-white relative" id="book-container">
                     <div class="win-header !bg-red-800 text-center py-2 text-xl">预约申请表</div>
                     <div class="p-6 space-y-4">
                         <input id="b-name" placeholder="您的称呼" class="border-4 border-black p-3 w-full font-bold text-lg">
@@ -151,6 +163,11 @@
                         <textarea id="b-msg" placeholder="描述您的灵异/职场/生活烦恼..." class="border-4 border-black p-3 w-full" rows="5"></textarea>
                         <button onclick="doBook()" class="nav-btn w-full !bg-red-700 !text-white !text-2xl py-4">提交预约并存档</button>
                     </div>
+                </div>
+                <!-- 文件夹存于下方 -->
+                <div id="folder-bin">
+                    <div class="text-[11px] font-bold">受托案件文件夹</div>
+                    <div id="f-num" class="text-3xl font-black">0</div>
                 </div>
             </div>
 
@@ -214,19 +231,15 @@
                     <a href="#">肉体改造部官方站</a><a href="#">脑感电波部BBS</a>
                 </div>
             </div>
-            <div class="win-box p-4 !bg-white">
-                <p class="text-xs font-bold mb-2">联系所长</p>
-<p class="text-[10px]">Email: <a href="mailto:2998159054@qq.com" class="underline">2998159054@qq.com</a></p>
-<p class="text-[10px] mt-1">xhs: <a href="https://xhslink.com/m/7wz4dWTwYxg" target="_blank" class="underline">点击访问小红书</a></p>
+            <div class="win-box p-4 !bg-white text-xs">
+                <p class="font-bold mb-1">联系所长</p>
+                <p>Email: <a href="mailto:2998159054@qq.com" class="underline">2998159054@qq.com</a></p>
+                <p class="mt-1">xhs: <a href="https://xhslink.com/m/7wz4dWTwYxg" target="_blank" class="underline">访问小红书</a></p>
             </div>
         </div>
     </div>
 
-    <div id="folder-bin">
-        <div class="text-[11px] font-bold">受托案件</div>
-        <div id="f-num" class="text-3xl font-black">0</div>
-    </div>
-
+    <!-- VN 弹窗 -->
     <div id="vn" class="vn-overlay" onclick="closeVN()">
         <div class="vn-box">
             <div class="vn-name">灵幻新隆</div>
@@ -247,7 +260,7 @@
         // ======= [核心配置：请填入你的信息] =======
         const SB_URL = 'https://lktlomkuofxjpkitijlv.supabase.co';
         const SB_KEY = 'sb_publishable_HTePepvWwtKAJvtGixhKbA_N9u7Ti0y';
-        const AI_PROXY = 'https://reigen-consultation.vercel.app/api/chat'; // 例如 https://xxx.vercel.app/api/chat
+        const AI_PROXY = 'https://reigen-consultation.vercel.app/api/chat'; 
         const HOME = 'https://dreamingchuchu.github.io/Reigen-consultation/';
         // ========================================
 
@@ -282,17 +295,30 @@
             }
         }
 
+        // --- 业务预订动效逻辑 ---
         async function doBook() {
             const n = document.getElementById('b-name').value, m = document.getElementById('b-msg').value;
             if(!n || !m) return alert("师匠：资料不完整，我没法通灵啊！");
+            
+            // 动效纸张
+            const paper = document.createElement('div');
+            paper.className = 'paper-fly';
+            paper.innerText = "受托合同";
+            document.getElementById('book-container').appendChild(paper);
+
             await sb.from('bookings').insert([{ client_name: n, content: m }]);
-            const { count } = await sb.from('bookings').select('*', { count: 'exact', head: true });
-            document.getElementById('f-num').innerText = count;
-            document.getElementById('vn-txt').innerText = `预订成功！你是第 ${count} 位受托人。请查收本大师特别准备的净化福利！`;
-            document.getElementById('vn').style.display='flex';
+            
+            setTimeout(async () => {
+                paper.remove();
+                const { count } = await sb.from('bookings').select('*', { count: 'exact', head: true });
+                document.getElementById('f-num').innerText = count;
+                document.getElementById('vn-txt').innerText = `预订成功！你是第 ${count} 位受托人。请查收本大师特别准备的净化福利！`;
+                document.getElementById('vn').style.display='flex';
+            }, 800);
         }
         function closeVN() { document.getElementById('vn').style.display='none'; }
 
+        // --- 论坛多用户回复逻辑 ---
         async function doForum() {
             if(!user) return alert("请先登录同步频率！");
             const t = document.getElementById('f-t').value, c = document.getElementById('f-c').value;
@@ -306,38 +332,72 @@
         async function loadBBS() {
             const { data } = await sb.from('forum_posts').select('*, forum_replies(*)').order('created_at', { ascending: false });
             const list = document.getElementById('bbs-list');
-            const show = user ? data : data.slice(0, 3);
-            list.innerHTML = show.map(p => `
+            
+            list.innerHTML = data.map(p => {
+                const replies = p.forum_replies || [];
+                return `
                 <div class="win-box !bg-white font-bold">
                     <div class="text-blue-900 underline text-xl">◆ ${p.title}</div>
                     <div class="my-3 text-sm">${p.content}</div>
-                    ${p.forum_replies.map(r => `<div class="master-reply"><span class="bg-red-700 text-white px-2 mr-2">MASTER</span>${r.content}</div>`).join('')}
+                    <div class="replies-container" id="replies-${p.id}">
+                        ${replies.map(r => `
+                            <div class="${r.author_name==='师匠'?'master-reply':'p-2 border-l-4 border-black bg-gray-100 text-xs mt-2'}">
+                                <b>${r.author_name}:</b> ${r.content}
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${replies.length > 3 ? `<span class="expand-hint" onclick="document.getElementById('replies-${p.id}').classList.add('expanded'); this.remove()">显示全部回复...</span>` : ''}
+                    <div class="mt-4 flex gap-1">
+                        <input id="rep-in-${p.id}" placeholder="回复信徒..." class="flex-grow p-1 border-2 border-black text-xs">
+                        <button onclick="userReply('${p.id}')" class="nav-btn !py-0 !px-4 text-xs">发送</button>
+                    </div>
                 </div>
-            `).join('');
-            if(!user && data.length > 3) list.innerHTML += `<div class="p-4 bg-gray-200 text-center text-sm">由于灵压不足，登录后解锁全部历史心事。</div>`;
+            `}).join('');
         }
 
+        async function userReply(pid) {
+            if(!user) return alert("同步磁场（登录）后才能回复！");
+            const txt = document.getElementById(`rep-in-${pid}`).value;
+            if(!txt) return;
+            await sb.from('forum_replies').insert([{ post_id: pid, author_name: user.email.split('@')[0], content: txt }]);
+            document.getElementById(`rep-in-${pid}`).value = "";
+            loadBBS();
+        }
+
+        // --- 灵感测试 5 问逻辑 ---
         async function ans(a) {
             chatLog.push({ role: "user", content: a });
             const box = document.getElementById('test-box');
-            if(chatLog.length < 5) {
+            const questionCount = chatLog.filter(m => m.role === 'user').length;
+
+            if(questionCount < 5) {
                 box.innerHTML = `<p class="animate-pulse text-xl">师匠正在认真观察你的磁场波动...</p>`;
-                const q = await callAI(`用户进行了灵感测试。之前的问答记录：${JSON.stringify(chatLog)}。请以师匠口吻追问下一个极具神棍色彩且引导性强的问题。`, "test");
+                const q = await callAI(`用户进行了灵感测试。目前的回答历史：${JSON.stringify(chatLog)}。请以灵幻师匠口吻追问第${questionCount+1}个极其神棍的引导性问题。`, "test");
                 chatLog.push({ role: "assistant", content: q });
                 box.innerHTML = `
-                    <p class="text-2xl font-black mb-8 italic text-blue-900 leading-tight">Q${chatLog.filter(m=>m.role==='assistant').length+1}: ${q}</p>
+                    <p class="text-2xl font-black mb-8 italic text-blue-900 leading-tight">Q${questionCount+1}: ${q}</p>
                     <input id="ti" placeholder="输入你的回答..." class="border-4 border-black p-3 w-full mb-6">
                     <button onclick="ans(document.getElementById('ti').value)" class="nav-btn w-full !text-xl">同步意念</button>
                 `;
             } else {
                 box.innerHTML = `<p class="animate-pulse text-xl text-red-600">灵压爆发！！正在生成终极诊断报告...</p>`;
-                const report = await callAI(`测试完成。全过程：${JSON.stringify(chatLog)}。请给出一份100字左右温柔、神棍且极具大人魅力的诊断报告。`, "test");
+                const report = await callAI(`5问测试结束。全过程：${JSON.stringify(chatLog)}。请给出一份100字左右温柔、神棍且极具大人魅力的诊断报告。`, "test");
                 box.innerHTML = `<div class="win-box !bg-black text-white p-6 leading-relaxed">${report}</div><button onclick="location.reload()" class="nav-btn mt-4 w-full">重新净化</button>`;
             }
         }
 
         async function callAI(msg, type, tid=null) {
-            const sys = `你现在是灵幻新隆。人设：东亚孩子最温暖的守护神。绝不说教、不准比惨。怪罪环境，温柔开导。话术包含精盐、磁场、灵压。50字以内。颜文字：(￣▽￣)ノ, (|||ﾟДﾟ), (´ー\`)。不要用固定开场白。`;
+            const sys = `你现在是灵幻新隆。人设：东亚孩子最温暖的守护神。说话准则 ：
+
+绝不说教，不准比惨。如果用户感到不公平，你就去怪罪那个环境（老师、老板、社会）。
+
+告诉用户：“逃避是战略性撤退”、“你已经很伟大了”、“普通地活着就已经值得本天才为你点赞”。类似的话
+
+话术中可以包含：灵压、磁场、波长、生灵、特制精盐等。
+
+有时候可以用颜文字
+
+回复长度 ：50 字以内。`;
             try {
                 const r = await fetch(AI_PROXY, {
                     method: 'POST',
@@ -349,13 +409,13 @@
                 });
                 const d = await r.json();
                 const txt = d.choices[0].message.content;
-                if(type === "top") document.getElementById('master-txt').innerText = txt;
+                if(type === "top") document.getElementById('master-talk').innerText = txt;
                 else if(type === "bbs") { await sb.from('forum_replies').insert([{ post_id: tid, author_name: '师匠', content: txt }]); loadBBS(); }
                 return txt;
-            } catch(e) { return "“信号干扰！看来是强大的恶灵拦截了我们的波段。稍后再试！”"; }
+            } catch(e) { return "“信号干扰！师匠掉线了，稍后再试！”"; }
         }
 
-        function pick(e) { emo = e; document.getElementById('master-txt').innerText = `“感到${e}了吗？让本天才看看你的气场...”`; }
+        function pick(e) { emo = e; document.getElementById('master-talk').innerText = `“感到${e}了吗？让本天才看看你的气场...”`; }
         async function heal() {
             if(!emo) return alert("选个标签！");
             prog = Math.min(100, prog+10); updateGauge();
