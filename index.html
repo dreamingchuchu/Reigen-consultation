@@ -81,7 +81,7 @@
         <!-- 左侧栏：常驻内容 -->
         <div class="side-bar">
             <div class="win-box">
-                <div class="win-header">官方净化套餐 (具体价目)</div>
+                <div class="win-header">净化套餐</div>
                 <div class="text-sm space-y-2">
                     <div class="flex justify-between border-b border-gray-400 pb-1"><span>● 灵气脉络体感重塑</span><span class="text-red-700">￥8k</span></div>
                     <div class="flex justify-between border-b border-gray-400 pb-1"><span>● 次元数字净化(PS)</span><span class="text-red-700">￥3k</span></div>
@@ -113,7 +113,7 @@
         <div class="main-panel">
             <div id="tab-home" class="tab-pane">
                 <div class="win-box !bg-black text-center mb-6 py-4">
-                    <div class="text-white text-xl mb-1">净化进度统计</div>
+                    <div class="text-white text-xl mb-1">进度统计</div>
                     <div id="gauge" class="text-7xl text-green-500 font-mono">000%</div>
                 </div>
                 <div class="speech-bubble">
@@ -415,7 +415,7 @@ async function callAI(msg, type, tid = null) {
         return txt; // 给测试页面返回结果内容
 
     } catch (e) {
-        console.error("灵压受阻：", e);
+        console.error("连接受阻：", e);
         return "“磁场受阻！看来是强大的恶灵拦截了我们的波段。稍后再试！”";
     }
 }
